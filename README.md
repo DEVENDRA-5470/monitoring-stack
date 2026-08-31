@@ -1,8 +1,9 @@
-# Monitoring Stack
+MONITORING STACK
 
 Kubernetes monitoring stack for the HireFlow cluster.
 
-## Components
+
+COMPONENTS
 
 - Prometheus
 - Grafana
@@ -10,7 +11,8 @@ Kubernetes monitoring stack for the HireFlow cluster.
 - kube-state-metrics
 - node-exporter
 
-## Requirements
+
+REQUIREMENTS
 
 - Kubernetes cluster
 - kubectl configured
@@ -18,51 +20,121 @@ Kubernetes monitoring stack for the HireFlow cluster.
 - Cluster permissions
 - Public firewall or NSG access to TCP port 30300
 
-## Files
 
-```text
+FILES
+
 monitoring-stack/
-├── README.md
+├── README.txt
 ├── install.sh
 ├── uninstall.sh
 └── values.yaml
-```
 
-## Install
 
-```bash
+HELM INSTALLATION
+
+Check whether Helm is already installed:
+
+helm version
+
+
+If Helm is not installed, install Helm:
+
+curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+
+Verify Helm installation:
+
+helm version
+
+
+Expected output will look similar to:
+
+version.BuildInfo{Version:"v3.x.x", ...}
+
+
+KUBERNETES CLUSTER VERIFICATION
+
+Verify that kubectl can communicate with the Kubernetes cluster:
+
+kubectl get nodes
+
+
+All required nodes should show:
+
+STATUS
+Ready
+
+
+Verify the current Kubernetes context:
+
+kubectl config current-context
+
+
+INSTALLATION
+
+Make the scripts executable:
+
 chmod +x install.sh uninstall.sh
+
+
+Run the installation:
+
 ./install.sh
-```
 
-## Verify
 
-```bash
+VERIFY INSTALLATION
+
+Check monitoring pods:
+
 kubectl get pods -n monitoring -o wide
+
+
+Check monitoring services:
+
 kubectl get svc -n monitoring
+
+
+Check the Helm release:
+
 helm list -n monitoring
-```
 
-## Grafana
 
-```text
+Check all monitoring pods:
+
+kubectl get pods -n monitoring
+
+
+Expected components include:
+
+Prometheus
+Grafana
+Alertmanager
+kube-state-metrics
+node-exporter
+
+
+GRAFANA ACCESS
+
+Grafana is exposed using NodePort 30300.
+
+Open:
+
 http://YOUR_PUBLIC_IP:30300
-```
 
-Username:
 
-```text
+USERNAME
+
 admin
-```
 
-Password:
 
-```bash
-kubectl get secret   -n monitoring   kube-prometheus-stack-grafana   -o jsonpath="{.data.admin-password}" | base64 -d
-```
+GET GRAFANA PASSWORD
 
-## Uninstall
+kubectl get secret \
+  -n monitoring \
+  kube-prometheus-stack-grafana \
+  -o jsonpath="{.data.admin-password}" | base64 -d
 
-```bash
+
+UNINSTALL
+
 ./uninstall.sh
-```
