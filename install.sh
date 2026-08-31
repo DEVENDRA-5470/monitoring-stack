@@ -5,7 +5,7 @@ set -Eeuo pipefail
 NAMESPACE="monitoring"
 RELEASE_NAME="kube-prometheus-stack"
 CHART_NAME="prometheus-community/kube-prometheus-stack"
-TIMEOUT="10m"
+TIMEOUT="5m"
 VALUES_FILE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/values.yaml"
 
 header() {
