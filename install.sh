@@ -6,7 +6,9 @@ NAMESPACE="monitoring"
 RELEASE_NAME="kube-prometheus-stack"
 CHART_NAME="prometheus-community/kube-prometheus-stack"
 TIMEOUT="5m"
-VALUES_FILE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/values.yaml"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VALUES_FILE="${SCRIPT_DIR}/values.yaml"
 
 header() {
   echo
@@ -28,12 +30,38 @@ info() {
   echo "ℹ️  $1"
 }
 
+header "Checking Required Tools 🛠️"
+
 command -v kubectl >/dev/null 2>&1 || fail "kubectl is not installed."
-command -v helm >/dev/null 2>&1 || fail "Helm is not installed."
+
+ok "kubectl is installed"
+
+if command -v helm >/dev/null 2>&1; then
+
+  ok "Helm is already installed"
+
+else
+
+  info "Helm is not installed"
+  info "Installing Helm..."
+
+  command -v curl >/dev/null 2>&1 || fail "curl is required to install Helm automatically."
+
+  curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+  command -v helm >/dev/null 2>&1 || fail "Helm installation failed."
+
+  ok "Helm installed successfully"
+
+fi
+
+header "Helm Version 🔍"
+
+helm version
 
 [[ -f "$VALUES_FILE" ]] || fail "values.yaml not found."
 
-header "Checking Kubernetes Cluster Connection"
+header "Checking Kubernetes Cluster Connection ☸️"
 
 kubectl cluster-info >/dev/null 2>&1 || fail "Cannot connect to Kubernetes cluster."
 
@@ -93,21 +121,33 @@ NODE_PORT=$(
 PUBLIC_IP=""
 
 if command -v curl >/dev/null 2>&1; then
+
   info "Detecting public IP..."
-  PUBLIC_IP=$(curl -fsS --max-time 5 https://api.ipify.org 2>/dev/null || true)
+
+  PUBLIC_IP=$(
+    curl -fsS \
+      --max-time 5 \
+      https://api.ipify.org \
+      2>/dev/null || true
+  )
+
 fi
 
 header "Grafana Access 📈"
 
 if [[ -n "$PUBLIC_IP" ]]; then
+
   echo "🌍 Grafana URL:"
   echo
   echo "http://${PUBLIC_IP}:${NODE_PORT}"
+
 else
+
   echo "⚠️ Public IP could not be detected."
   echo
   echo "Use:"
   echo "http://YOUR_PUBLIC_IP:${NODE_PORT}"
+
 fi
 
 echo
@@ -117,7 +157,8 @@ echo "admin"
 echo
 echo "🔐 Password command:"
 echo
-echo "kubectl get secret -n ${NAMESPACE} ${RELEASE_NAME}-grafana -o jsonpath=\"{.data.admin-password}\" | base64 -d"
+
+echo "kubectl get secret -n ${NAMESPACE} ${RELEASE_NAME}-grafana -o jsonpath=\"{.data.admin-password}\" | base64 -d ; echo"
 
 echo
 
