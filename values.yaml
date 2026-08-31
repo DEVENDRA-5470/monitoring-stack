@@ -10,6 +10,9 @@ grafana:
   persistence:
     enabled: true
     type: pvc
+    storageClassName: local-path
+    accessModes:
+      - ReadWriteOnce
     size: 5Gi
 
   resources:
@@ -19,6 +22,7 @@ grafana:
     limits:
       cpu: 500m
       memory: 512Mi
+
 
 prometheus:
   enabled: true
@@ -30,8 +34,10 @@ prometheus:
     storageSpec:
       volumeClaimTemplate:
         spec:
+          storageClassName: local-path
           accessModes:
             - ReadWriteOnce
+
           resources:
             requests:
               storage: 10Gi
@@ -43,6 +49,7 @@ prometheus:
       limits:
         cpu: "1"
         memory: 2Gi
+
 
 alertmanager:
   enabled: true
@@ -56,8 +63,10 @@ alertmanager:
         cpu: 500m
         memory: 512Mi
 
+
 kubeStateMetrics:
   enabled: true
+
 
 nodeExporter:
   enabled: true
